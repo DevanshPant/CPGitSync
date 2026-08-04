@@ -6,6 +6,7 @@ import { extFor } from "./lib/langmap.js";
 
 const DEFAULTS = {
   token: "",
+  ghUser: "",
   owner: "",
   repo: "",
   branch: "main",

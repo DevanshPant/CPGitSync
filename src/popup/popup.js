@@ -62,7 +62,8 @@ async function load() {
   const configured = cfg.token && cfg.owner && cfg.repo;
   if (configured) {
     $("repoLine").textContent = `${cfg.owner}/${cfg.repo}`;
-    $("connLine").innerHTML = `<span class="pill ok">Connected</span> <span class="eyebrow">${cfg.branch || "main"}</span>`;
+    const who = cfg.ghUser ? `@${cfg.ghUser} · ` : "";
+    $("connLine").innerHTML = `<span class="pill ok">Connected</span> <span class="eyebrow">${who}${cfg.branch || "main"}</span>`;
   } else {
     $("repoLine").textContent = "Not connected";
     $("connLine").innerHTML = '<span class="pill err">Set up needed</span>';

@@ -45,6 +45,54 @@
 .result.ok { color: var(--ok); }
 .result.err { color: var(--err); }
 
+/* OAuth / login */
+.safe { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ink-soft); font-size: 10px; }
+
+.connected {
+  border: 3px solid var(--ok);
+  background: rgba(31, 138, 76, 0.08);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.help { margin: -6px 0 16px; font-size: 12px; color: var(--ink-soft); }
+.help summary { cursor: pointer; font-weight: 700; color: var(--accent); }
+.help ol { margin: 10px 0 0; padding-left: 18px; line-height: 1.7; }
+.help a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.help a:hover { text-decoration: underline; }
+
+.login-status { display: block; margin-top: 12px; }
+.login-status.result { font-weight: 400; }
+
+.devflow {
+  border: 3px solid var(--line);
+  background: var(--card);
+  padding: 14px;
+}
+.devflow .dfline { font-size: 12px; color: var(--ink-soft); margin-bottom: 6px; }
+.devflow .dfcode {
+  font-family: "DM Sans", monospace;
+  font-weight: 700;
+  font-size: 30px;
+  letter-spacing: 0.2em;
+  color: var(--ink);
+  padding: 8px 0 12px;
+}
+.devflow .dfwait { font-weight: 700; color: var(--accent); margin-top: 8px; }
+
+.advanced { padding: 0; }
+.advanced .adv-summary {
+  cursor: pointer;
+  padding: 18px 24px;
+  margin: 0;
+  border-bottom: none;
+  list-style: revert;
+}
+.advanced[open] .adv-summary { border-bottom: 3px solid var(--line); }
+.advanced .note, .advanced .field { margin-left: 24px; margin-right: 24px; }
+.advanced .field { margin-bottom: 24px; }
+
 .foot {
   text-align: center;
   margin-top: 40px;

@@ -33,10 +33,18 @@ That's it — you keep grinding, your GitHub fills up on its own.
 
 ## Setup
 
-1. Create a GitHub **fine-grained token** with **Contents: Read and write** access to your repo: https://github.com/settings/tokens?type=beta
+CPGitSync signs in with **"Login with GitHub"** (GitHub's Device Flow) — you never paste a secret key. It's a one-time OAuth App registration, then click-and-approve.
+
+1. **Register an OAuth App** (one time, ~2 min) at https://github.com/settings/applications/new
+   - Application name: `CPGitSync`
+   - Homepage URL / Authorization callback URL: your repo URL (the callback isn't used by device flow, but the field is required)
+   - ✅ **Check "Enable Device Flow"** — required
+   - Register, then copy the **Client ID** (this is public, not a secret).
 2. Create an empty repo (public or private) to hold your solutions.
-3. Open the extension, go to **Settings**, and fill in the token, owner (your username), repo, and branch.
-4. Click **Test connection**. If it turns green, you're done. Hit **Save**.
+3. Open the extension → **Settings** → paste the **Client ID** → click **Login with GitHub**. A code is copied to your clipboard and GitHub opens — paste it, approve, done.
+4. Fill in **owner** and **repo**, click **Test connection** (should turn green), then **Save**.
+
+> Prefer a Personal Access Token instead? There's an **Advanced** section for that — paste a fine-grained token with **Contents: Read & write**. No login needed then.
 
 ## How your repo gets organized
 
