@@ -1,0 +1,138 @@
+/* CPGitSync theme — inspired by the tryPrmpt look:
+   warm cream canvas, dark navy ink, neo-brutalist sharp black controls,
+   Lora serif display + DM Sans body, uppercase labels, ✦ ◆ marks. */
+
+:root {
+  --bg: #fff2eb;
+  --card: #fff8f3;
+  --ink: #1d283a;
+  --ink-soft: #55617a;
+  --line: #232629;
+  --btn: #232629;
+  --btn-fg: #fff4ed;
+  --accent: #e8552d;   /* warm coral */
+  --ok: #1f8a4c;
+  --err: #c0392b;
+  --shadow: 4px 4px 0 var(--line);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, .display {
+  font-family: "Lora", Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  font-weight: 600;
+}
+
+.mark { color: var(--accent); }
+
+/* Buttons — hard borders, zero radius, invert on hover */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  font-family: "DM Sans", system-ui, sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--btn-fg);
+  background: var(--btn);
+  border: 3px solid var(--line);
+  border-radius: 0;
+  cursor: pointer;
+  transition: transform 0.05s ease, background 0.15s ease, color 0.15s ease;
+}
+.btn:hover { background: var(--bg); color: var(--ink); }
+.btn:active { transform: translate(2px, 2px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.btn.ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn.ghost:hover { background: var(--ink); color: var(--btn-fg); }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 3px solid var(--line);
+  border-radius: 0;
+  box-shadow: var(--shadow);
+}
+
+/* Inputs */
+label.field { display: block; margin-bottom: 14px; }
+label.field .lbl {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--ink);
+}
+input[type="text"], input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  font-family: "DM Sans", monospace;
+  font-size: 13px;
+  color: var(--ink);
+  background: #fff;
+  border: 3px solid var(--line);
+  border-radius: 0;
+  outline: none;
+}
+input:focus { box-shadow: var(--shadow); }
+
+/* Toggle switch */
+.switch { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; user-select: none; }
+.switch input { display: none; }
+.switch .track {
+  width: 46px; height: 26px;
+  border: 3px solid var(--line);
+  background: var(--bg);
+  position: relative;
+  transition: background 0.15s ease;
+}
+.switch .track::after {
+  content: "";
+  position: absolute; top: 1px; left: 1px;
+  width: 16px; height: 16px;
+  background: var(--line);
+  transition: left 0.15s ease;
+}
+.switch input:checked + .track { background: var(--ok); }
+.switch input:checked + .track::after { left: 23px; background: #fff; }
+
+.divider { height: 3px; background: var(--line); border: 0; margin: 16px 0; }
+
+.pill {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  border: 2px solid var(--line);
+}
+.pill.ok { background: var(--ok); color: #fff; border-color: var(--ok); }
+.pill.err { background: var(--err); color: #fff; border-color: var(--err); }

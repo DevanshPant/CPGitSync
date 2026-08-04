@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="stylesheet" href="../styles/theme.css" />
+  <link rel="stylesheet" href="popup.css" />
+  <title>CPGitSync</title>
+</head>
+<body>
+  <div class="wrap">
+    <header class="head">
+      <div class="brand">
+        <span class="mark">◆</span>
+        <span class="display wordmark">CPGITSYNC</span>
+      </div>
+      <label class="switch" title="Enable / disable auto-push">
+        <input type="checkbox" id="enabled" />
+        <span class="track"></span>
+      </label>
+    </header>
+
+    <p class="eyebrow tagline">✦ Push accepted solutions to GitHub</p>
+
+    <section class="card status" id="statusCard">
+      <div class="eyebrow">Repository</div>
+      <div class="repo" id="repoLine">Not connected</div>
+      <div class="conn" id="connLine"><span class="pill err">Set up needed</span></div>
+    </section>
+
+    <button class="btn" id="pushBtn">Push this solution ↗</button>
+    <p class="hint" id="pushHint">Open a problem tab, then push its current code.</p>
+
+    <hr class="divider" />
+
+    <div class="eyebrow">Recent pushes</div>
+    <ul class="history" id="history">
+      <li class="empty">Nothing pushed yet.</li>
+    </ul>
+
+    <button class="btn ghost" id="settingsBtn">Settings →</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

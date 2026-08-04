@@ -1,0 +1,60 @@
+.page {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
+}
+
+.hero { text-align: center; margin-bottom: 32px; }
+.hero .display { font-size: 52px; margin: 8px 0 6px; text-transform: uppercase; }
+.hero .sub { color: var(--ink-soft); font-size: 15px; margin: 0; }
+
+.panel { padding: 24px; margin-bottom: 24px; }
+.panel-title {
+  font-size: 15px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 3px solid var(--line);
+}
+
+.note {
+  font-size: 12px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  margin: -6px 0 16px;
+}
+.note a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.note a:hover { text-decoration: underline; }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+
+.actions { display: flex; align-items: center; gap: 14px; margin-top: 4px; }
+.actions .btn { width: auto; padding: 10px 18px; }
+
+.platforms { display: flex; flex-direction: column; gap: 14px; }
+.platrow { justify-content: flex-start; }
+.platrow .pname { font-weight: 700; font-size: 14px; }
+
+.save-bar { display: flex; align-items: center; gap: 16px; }
+.save-bar .btn { width: auto; padding: 14px 28px; }
+
+.result { font-size: 13px; font-weight: 700; }
+.result.ok { color: var(--ok); }
+.result.err { color: var(--err); }
+
+.foot {
+  text-align: center;
+  margin-top: 40px;
+  font-size: 12px;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+.foot .mark { color: var(--accent); }
+
+@media (max-width: 520px) {
+  .grid2 { grid-template-columns: 1fr; }
+  .hero .display { font-size: 40px; }
+}

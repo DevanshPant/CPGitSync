@@ -1,0 +1,138 @@
+// Service worker: receives solution payloads from content scripts and commits
+// them to GitHub. Also handles config test + history bookkeeping.
+
+import { commitFile, getRepo } from "./lib/github.js";
+import { extFor } from "./lib/langmap.js";
+
+const DEFAULTS = {
+  token: "",
+  owner: "",
+  repo: "",
+  branch: "main",
+  enabled: true,
+  platforms: { leetcode: true, codeforces: true, codechef: true },
+  history: []
+};
+
+async function getConfig() {
+  const stored = await chrome.storage.local.get(Object.keys(DEFAULTS));
+  return { ...DEFAULTS, ...stored, platforms: { ...DEFAULTS.platforms, ...(stored.platforms || {}) } };
+}
+
+function slugify(s) {
+  return String(s || "").toLowerCase().trim()
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "problem";
+}
+
+function notify(title, message) {
+  try {
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: chrome.runtime.getURL("assets/icons/icon128.png"),
+      title,
+      message
+    });
+  } catch (_) { /* notifications permission may be off */ }
+}
+
+async function pushHistory(entry) {
+  const { history } = await chrome.storage.local.get("history");
+  const list = Array.isArray(history) ? history : [];
+  list.unshift(entry);
+  await chrome.storage.local.set({ history: list.slice(0, 30) });
+}
+
+// Build the folder + files for one solution and commit them.
+async function handleSolution(payload) {
+  const cfg = await getConfig();
+
+  if (!cfg.enabled) return { ok: false, reason: "CPGitSync is turned off" };
+  if (!cfg.token || !cfg.owner || !cfg.repo) {
+    notify("CPGitSync not set up", "Open the extension options and add your GitHub token + repo.");
+    return { ok: false, reason: "Not configured" };
+  }
+  if (cfg.platforms[payload.platform] === false) {
+    return { ok: false, reason: `${payload.platform} disabled` };
+  }
+
+  const ext = payload.ext || extFor(payload.lang);
+  const num = payload.id ? String(payload.id).padStart(4, "0") : "";
+  const slug = slugify(payload.slug || payload.title);
+  const folderName = num ? `${num}-${slug}` : slug;
+  const dir = `${payload.platform}/${folderName}`;
+  const codePath = `${dir}/${slug}.${ext}`;
+  const readmePath = `${dir}/README.md`;
+
+  const title = payload.title || slug;
+  const commitMsg = `${payload.platform}: ${title}${num ? ` (#${payload.id})` : ""}`;
+
+  // Per-problem README with metadata + stats.
+  const stats = payload.stats || {};
+  const readme = [
+    `# ${title}`,
+    "",
+    payload.difficulty ? `**Difficulty:** ${payload.difficulty}  ` : "",
+    payload.lang ? `**Language:** ${payload.lang}  ` : "",
+    stats.runtime ? `**Runtime:** ${stats.runtime}  ` : "",
+    stats.memory ? `**Memory:** ${stats.memory}  ` : "",
+    payload.url ? `\n[View problem](${payload.url})` : "",
+    "",
+    "---",
+    "_Committed automatically by [CPGitSync](https://github.com)._"
+  ].filter((l) => l !== "").join("\n");
+
+  try {
+    const res = await commitFile({
+      owner: cfg.owner, repo: cfg.repo, branch: cfg.branch, token: cfg.token,
+      path: codePath, content: payload.code, message: commitMsg
+    });
+    // README is best-effort; a failure here shouldn't block the solution.
+    try {
+      await commitFile({
+        owner: cfg.owner, repo: cfg.repo, branch: cfg.branch, token: cfg.token,
+        path: readmePath, content: readme, message: `docs: ${title} notes`
+      });
+    } catch (_) {}
+
+    await pushHistory({
+      platform: payload.platform, title, num: payload.id || "",
+      path: codePath, url: res.url, at: Date.now(), updated: res.updated
+    });
+    notify(res.updated ? "Solution updated ✓" : "Pushed to GitHub ✓",
+      `${title} → ${cfg.owner}/${cfg.repo}`);
+    return { ok: true, url: res.url, updated: res.updated };
+  } catch (err) {
+    notify("Push failed", err.message || String(err));
+    await pushHistory({
+      platform: payload.platform, title, error: err.message || String(err), at: Date.now()
+    });
+    return { ok: false, reason: err.message || String(err) };
+  }
+}
+
+chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
+  if (!msg || !msg.type) return;
+
+  if (msg.type === "CPGITSYNC_SOLUTION") {
+    handleSolution(msg.payload).then(sendResponse);
+    return true; // async
+  }
+
+  if (msg.type === "CPGITSYNC_TEST") {
+    (async () => {
+      try {
+        const { token, owner, repo } = msg.config;
+        const info = await getRepo({ owner, repo, token });
+        sendResponse({ ok: true, full_name: info.full_name, private: info.private, default_branch: info.default_branch });
+      } catch (err) {
+        sendResponse({ ok: false, reason: err.message || String(err) });
+      }
+    })();
+    return true;
+  }
+
+  if (msg.type === "CPGITSYNC_GET_CONFIG") {
+    getConfig().then(sendResponse);
+    return true;
+  }
+});

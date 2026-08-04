@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../styles/theme.css" />
+  <link rel="stylesheet" href="options.css" />
+  <title>CPGitSync — Settings</title>
+</head>
+<body>
+  <main class="page">
+    <div class="hero">
+      <p class="eyebrow">✦ Configure ✦ Connect ✦ Commit ✦</p>
+      <h1 class="display">CPGITSYNC<span class="mark"> ◆</span></h1>
+      <p class="sub">Auto-push your accepted solutions straight to a GitHub repo.</p>
+    </div>
+
+    <section class="card panel">
+      <h2 class="panel-title">GitHub connection</h2>
+
+      <label class="field">
+        <span class="lbl">Personal access token</span>
+        <input type="password" id="token" placeholder="ghp_… or github_pat_…" autocomplete="off" />
+      </label>
+      <p class="note">
+        Create a <b>fine-grained token</b> with <b>Contents: Read &amp; write</b> on your target repo.
+        <a href="https://github.com/settings/tokens?type=beta" target="_blank" rel="noopener">Create one →</a>
+        The token is stored only in this browser.
+      </p>
+
+      <div class="grid2">
+        <label class="field">
+          <span class="lbl">Owner (user / org)</span>
+          <input type="text" id="owner" placeholder="your-username" />
+        </label>
+        <label class="field">
+          <span class="lbl">Repository</span>
+          <input type="text" id="repo" placeholder="my-solutions" />
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="lbl">Branch</span>
+        <input type="text" id="branch" placeholder="main" />
+      </label>
+
+      <div class="actions">
+        <button class="btn ghost" id="testBtn">Test connection</button>
+        <span class="result" id="testResult"></span>
+      </div>
+    </section>
+
+    <section class="card panel">
+      <h2 class="panel-title">Platforms</h2>
+      <p class="note">Turn auto-push on or off per site.</p>
+      <div class="platforms">
+        <label class="switch platrow"><input type="checkbox" id="p_leetcode" /><span class="track"></span><span class="pname">LeetCode</span></label>
+        <label class="switch platrow"><input type="checkbox" id="p_codeforces" /><span class="track"></span><span class="pname">Codeforces</span></label>
+        <label class="switch platrow"><input type="checkbox" id="p_codechef" /><span class="track"></span><span class="pname">CodeChef</span></label>
+      </div>
+    </section>
+
+    <div class="save-bar">
+      <button class="btn" id="saveBtn">Save settings</button>
+      <span class="result" id="saveResult"></span>
+    </div>
+
+    <footer class="foot">
+      <span class="mark">◆</span> Made for the grind. Your solutions, versioned.
+    </footer>
+  </main>
+
+  <script src="options.js"></script>
+</body>
+</html>

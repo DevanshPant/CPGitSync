@@ -1,0 +1,14 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node (only used for the icon generator)
+node_modules/
+
+# Never commit secrets — tokens live in chrome.storage, not files
+*.token
+secrets.json
+.env
