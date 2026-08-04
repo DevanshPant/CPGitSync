@@ -1,20 +1,44 @@
-# ◆ CPGitSync
+# CPGitSync
 
-**Auto-push your accepted LeetCode, Codeforces & CodeChef solutions straight to a GitHub repository.**
+Sync your competitive programming solutions to GitHub automatically.
 
-Solve a problem, get *Accepted*, and CPGitSync quietly commits your code — organised into tidy per-problem folders with a README of stats — to the repo of your choice. No copy-paste, no git commands. A Chrome (Manifest V3) extension with a warm, neo‑brutalist UI.
+When you solve a problem on **LeetCode**, **Codeforces**, or **CodeChef** and get an *Accepted* verdict, CPGitSync grabs your submitted code and pushes it to a GitHub repo you pick. No manual copy-pasting, no git commands.
 
----
+It's a Chrome extension. There's no server and no account to make — it uses your own GitHub token and talks straight to the GitHub API.
 
-## Features
+## How it works
 
-- **LeetCode** — detects an *Accepted* verdict, pulls your exact submission (code + runtime/memory) via LeetCode's GraphQL API, and commits it.
-- **Codeforces** — watches the submissions table; when a verdict turns *Accepted*, grabs the source via Codeforces' own endpoint and commits it.
-- **CodeChef** — best‑effort auto‑detect, plus a reliable **manual "Push this solution"** button in the popup.
-- **No backend required** — uses a GitHub Personal Access Token and the [Contents API](https://docs.github.com/en/rest/repos/contents). Your token lives only in this browser.
-- Per‑platform toggles, master on/off switch, and a recent‑push history.
+**One-time setup**
 
-### Repo layout it creates
+1. Load the extension in Chrome (see *Install* below).
+2. Make an empty GitHub repo to store your solutions.
+3. Create a GitHub token and paste it, plus the repo name, into the extension's settings.
+
+**Every time you solve a problem**
+
+1. You submit your solution on the coding site as usual.
+2. The moment the verdict shows *Accepted*, the extension notices it.
+3. It reads the exact code you submitted, along with the problem name, language, and stats.
+4. It commits that code to your repo inside a folder for the problem, and adds a small README with the details.
+5. A browser notification confirms the push. If you solve the same problem again, it updates the existing file instead of duplicating it.
+
+That's it — you keep grinding, your GitHub fills up on its own.
+
+## Install
+
+1. Download or clone this repo.
+2. Run the icon generator once: `node scripts/make-icons.js`
+3. Go to `chrome://extensions`, turn on **Developer mode** (top right).
+4. Click **Load unpacked** and select the `cpgitsync` folder.
+
+## Setup
+
+1. Create a GitHub **fine-grained token** with **Contents: Read and write** access to your repo: https://github.com/settings/tokens?type=beta
+2. Create an empty repo (public or private) to hold your solutions.
+3. Open the extension, go to **Settings**, and fill in the token, owner (your username), repo, and branch.
+4. Click **Test connection**. If it turns green, you're done. Hit **Save**.
+
+## How your repo gets organized
 
 ```
 leetcode/
@@ -25,78 +49,28 @@ codeforces/
   1795a-blank-space/
     1795a-blank-space.cpp
     README.md
+codechef/
+  flow001/
+    flow001.py
+    README.md
 ```
 
----
+Each problem gets its own folder with the solution file and a short README (difficulty, language, runtime, link to the problem).
 
-## Install (developer / unpacked)
+## Supported sites
 
-1. Generate the icons (one‑time):
-   ```bash
-   node scripts/make-icons.js
-   ```
-2. Open **chrome://extensions** and turn on **Developer mode** (top‑right).
-3. Click **Load unpacked** and select this `cpgitsync/` folder.
-4. Click the CPGitSync icon → **Settings**.
+| Site | How it pushes |
+|------|---------------|
+| LeetCode | Automatic on *Accepted* |
+| Codeforces | Automatic when the verdict turns *Accepted* |
+| CodeChef | Automatic (best-effort) + a manual **Push this solution** button in the popup |
 
-## Set up
-
-1. Create a GitHub **fine‑grained personal access token** with **Repository access** to your target repo and **Contents: Read and write** permission:
-   → https://github.com/settings/tokens?type=beta
-2. In CPGitSync **Settings**, paste the token and fill in **owner**, **repo**, and **branch** (default `main`).
-3. Hit **Test connection** — you should see your repo confirmed. **Save settings**.
-4. Solve a problem. On *Accepted*, it pushes automatically. On CodeChef/LeetCode you can also open the popup and hit **Push this solution**.
-
-> The repo must already exist. Create an empty one on GitHub first (public or private — the token controls access).
-
----
-
-## How detection works
-
-| Platform    | Mechanism |
-|-------------|-----------|
-| LeetCode    | A page‑world script intercepts the `/submissions/detail/<id>/check/` response; on `Accepted`, the content script calls the `submissionDetails` GraphQL query for the code + stats. |
-| Codeforces  | A `MutationObserver` watches submission tables; a row flipping to `.verdict-accepted` triggers a `POST /data/submitSource` to fetch the source. |
-| CodeChef    | Interceptor sniffs submission‑result responses for an accepted verdict; code is read from the in‑page Ace editor. Manual push is the dependable fallback. |
-
-All GitHub writes happen in the background service worker (`src/background.js`).
-
----
-
-## Project structure
-
-```
-cpgitsync/
-├── manifest.json
-├── assets/icons/            # generated by scripts/make-icons.js
-├── scripts/make-icons.js
-└── src/
-    ├── background.js        # commit orchestration (service worker, ES module)
-    ├── interceptor.js       # MAIN-world network sniffer + editor bridge
-    ├── lib/
-    │   ├── github.js        # GitHub Contents API client
-    │   └── langmap.js       # language → file extension
-    ├── content/
-    │   ├── leetcode.js
-    │   ├── codeforces.js
-    │   └── codechef.js
-    ├── popup/               # toolbar popup (status, manual push, history)
-    ├── options/             # settings page
-    └── styles/theme.css     # shared tryPrmpt-inspired theme
-```
-
----
+CodeChef doesn't expose a public submission API, so on that site the manual button is the reliable option if auto-detect misses.
 
 ## Privacy
 
-CPGitSync talks to exactly three origins: the coding site you're on, and `api.github.com`. Your token and settings are stored with `chrome.storage.local` (this browser only) and are never sent anywhere except GitHub. No analytics, no servers.
-
-## Roadmap ideas
-
-- "Login with GitHub" OAuth flow (needs a tiny serverless token‑exchange endpoint).
-- Streak/stats badges and a root README leaderboard.
-- Firefox build (works with minor `manifest` tweaks).
+Your token and settings are stored only in your browser (`chrome.storage.local`). The extension connects to two places: the coding site you're on, and `api.github.com`. Nothing else. No tracking, no external servers.
 
 ---
 
-_Not affiliated with LeetCode, Codeforces, CodeChef, or GitHub._
+Not affiliated with LeetCode, Codeforces, CodeChef, or GitHub.
