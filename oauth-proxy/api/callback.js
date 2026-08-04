@@ -29,6 +29,11 @@ export default async function handler(req, res) {
     return res.status(400).send("Invalid redirect target.");
   }
 
+  // Clear signal if the deployment is missing its env vars.
+  if (!process.env.GITHUB_CLIENT_ID || !process.env.GITHUB_CLIENT_SECRET) {
+    return fail(res, ext, "server_missing_env_vars (set GITHUB_CLIENT_ID and GITHUB_CLIENT_SECRET on Vercel, then redeploy)");
+  }
+
   try {
     const ghRes = await fetch("https://github.com/login/oauth/access_token", {
       method: "POST",
@@ -40,7 +45,9 @@ export default async function handler(req, res) {
       })
     });
     const data = await ghRes.json();
-    if (data.error || !data.access_token) return fail(res, ext, data.error || "no_token");
+    if (data.error || !data.access_token) {
+      return fail(res, ext, data.error_description || data.error || "no_token");
+    }
 
     res.setHeader("Cache-Control", "no-store");
     return res.redirect(302, `${ext}#access_token=${encodeURIComponent(data.access_token)}`);
