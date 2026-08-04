@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="../styles/theme.css" />
+  <link rel="stylesheet" href="streak.css" />
+  <title>CPGitSync — My Streak</title>
+</head>
+<body>
+  <main class="page">
+    <div class="hero">
+      <p class="eyebrow">✦ Keep the fire alive ✦</p>
+      <h1 class="display">MY STREAK<span class="mark"> ◆</span></h1>
+    </div>
+
+    <!-- The visual card users share -->
+    <section class="sharecard" id="card">
+      <div class="cardtop">
+        <span class="brand">CPGITSYNC <span class="mark">◆</span></span>
+        <span class="handle" id="handle">@you</span>
+      </div>
+      <div class="flamewrap">
+        <div class="flame">🔥</div>
+        <div class="bignum" id="cardNum">0</div>
+        <div class="dayword" id="cardWord">DAY STREAK</div>
+      </div>
+      <div class="cardstats">
+        <div class="cs"><span class="csn" id="cardBest">0</span><span class="csl">Longest</span></div>
+        <div class="cs"><span class="csn" id="cardTotal">0</span><span class="csl">Solved</span></div>
+      </div>
+      <div class="cardfoot">LeetCode · Codeforces · CodeChef → GitHub</div>
+    </section>
+
+    <div class="statusnote" id="statusNote"></div>
+
+    <section class="sharegrid">
+      <button class="btn share-wa" id="shareWa">WhatsApp</button>
+      <button class="btn share-x" id="shareX">Share on X</button>
+      <button class="btn ghost" id="copyBtn">Copy text</button>
+      <button class="btn" id="downloadBtn">Download card ↓</button>
+      <button class="btn ghost" id="nativeBtn" style="display:none;">Share…</button>
+    </section>
+
+    <p class="ighint">
+      <b>Instagram?</b> Tap <b>Download card</b>, then post the image to your Story or feed —
+      Instagram doesn't allow pre-filled shares, so the image is the way.
+    </p>
+
+    <canvas id="canvas" width="1080" height="1080" style="display:none;"></canvas>
+
+    <footer class="foot"><span class="mark">◆</span> Solve today to keep it going.</footer>
+  </main>
+
+  <script src="streak.js"></script>
+</body>
+</html>

@@ -69,8 +69,31 @@ async function load() {
     $("connLine").innerHTML = '<span class="pill err">Set up needed</span>';
   }
 
+  renderStreak(cfg.streak);
   renderHistory(cfg.history);
   return cfg;
+}
+
+function localDay(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function renderStreak(streak) {
+  const s = streak || { current: 0, longest: 0, lastActiveDate: "", total: 0 };
+  // A streak is "alive" only if the last active day was today or yesterday.
+  let alive = 0;
+  if (s.lastActiveDate) {
+    const gap = Math.round((new Date(localDay() + "T00:00:00") - new Date(s.lastActiveDate + "T00:00:00")) / 86400000);
+    alive = gap <= 1 ? s.current : 0;
+  }
+  $("streakNum").textContent = alive;
+  $("streakLabel").textContent = alive === 1 ? "day streak" : "day streak";
+  $("streakBest").textContent = s.longest || 0;
+  $("streakTotal").textContent = s.total || 0;
+  document.getElementById("streakbar").classList.toggle("cold", alive === 0);
 }
 
 $("enabled").addEventListener("change", (e) => {
@@ -78,6 +101,10 @@ $("enabled").addEventListener("change", (e) => {
 });
 
 $("settingsBtn").addEventListener("click", () => chrome.runtime.openOptionsPage());
+
+$("shareStreak").addEventListener("click", () => {
+  chrome.tabs.create({ url: chrome.runtime.getURL("src/streak/streak.html") });
+});
 
 $("pushBtn").addEventListener("click", async () => {
   const btn = $("pushBtn");

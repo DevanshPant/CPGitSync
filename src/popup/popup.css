@@ -11,7 +11,52 @@ body { width: 340px; }
 .brand .mark { font-size: 18px; }
 .wordmark { font-size: 22px; letter-spacing: 0.02em; }
 
-.tagline { margin: 2px 0 14px; }
+.tagline { margin: 2px 0 12px; }
+
+/* Streak navbar */
+.streakbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  color: var(--btn-fg);
+  border: 3px solid var(--line);
+  box-shadow: var(--shadow);
+  padding: 10px 12px;
+  margin-bottom: 16px;
+}
+.streakbar .flame { font-size: 22px; line-height: 1; }
+.streakbar .scount b { font-size: 22px; font-family: "Lora", Georgia, serif; }
+.streakbar .scount small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #d9c7bb;
+}
+.streakbar .sdivider { width: 2px; align-self: stretch; background: #46484b; margin: 0 2px; }
+.streakbar .sstat {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #d9c7bb;
+}
+.streakbar .sstat b { color: var(--btn-fg); font-size: 13px; }
+.streakbar .sharebtn {
+  margin-left: auto;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: var(--accent);
+  border: 2px solid var(--accent);
+  padding: 6px 10px;
+  cursor: pointer;
+}
+.streakbar .sharebtn:hover { background: var(--btn-fg); border-color: var(--btn-fg); }
+.streakbar.cold .flame { filter: grayscale(1); opacity: 0.6; }
 
 .status { padding: 12px 14px; margin-bottom: 14px; }
 .status .repo {

@@ -12,8 +12,36 @@ const DEFAULTS = {
   branch: "main",
   enabled: true,
   platforms: { leetcode: true, codeforces: true, codechef: true },
-  history: []
+  history: [],
+  streak: { current: 0, longest: 0, lastActiveDate: "", total: 0 }
 };
+
+// --- Streak tracking ------------------------------------------------------
+function localDay(d = new Date()) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+function daysBetween(a, b) {
+  return Math.round((new Date(a + "T00:00:00") - new Date(b + "T00:00:00")) / 86400000);
+}
+async function bumpStreak() {
+  const { streak } = await chrome.storage.local.get("streak");
+  const s = streak || { current: 0, longest: 0, lastActiveDate: "", total: 0 };
+  const today = localDay();
+  if (s.lastActiveDate === today) {
+    s.total += 1; // already counted today — streak unchanged
+  } else {
+    const gap = s.lastActiveDate ? daysBetween(today, s.lastActiveDate) : null;
+    s.current = gap === 1 ? s.current + 1 : 1; // continue if yesterday, else restart
+    s.lastActiveDate = today;
+    s.total += 1;
+  }
+  if (s.current > s.longest) s.longest = s.current;
+  await chrome.storage.local.set({ streak: s });
+  return s;
+}
 
 async function getConfig() {
   const stored = await chrome.storage.local.get(Object.keys(DEFAULTS));
@@ -99,9 +127,10 @@ async function handleSolution(payload) {
       platform: payload.platform, title, num: payload.id || "",
       path: codePath, url: res.url, at: Date.now(), updated: res.updated
     });
+    const s = await bumpStreak();
     notify(res.updated ? "Solution updated ✓" : "Pushed to GitHub ✓",
-      `${title} → ${cfg.owner}/${cfg.repo}`);
-    return { ok: true, url: res.url, updated: res.updated };
+      `${title} → ${cfg.owner}/${cfg.repo}  ·  🔥 ${s.current}-day streak`);
+    return { ok: true, url: res.url, updated: res.updated, streak: s };
   } catch (err) {
     notify("Push failed", err.message || String(err));
     await pushHistory({
