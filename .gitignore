@@ -8,6 +8,9 @@ Thumbs.db
 # Node (only used for the icon generator)
 node_modules/
 
+# Build artifact — rebuild with scripts/package.py
+cpgitsync.zip
+
 # Never commit secrets — tokens live in chrome.storage, not files
 *.token
 secrets.json
