@@ -4,6 +4,58 @@
 import { commitFile, getRepo } from "./lib/github.js";
 import { extFor } from "./lib/langmap.js";
 
+// ─── OAuth config ─────────────────────────────────────────────────────────
+// Filled in once the GitHub OAuth App + Vercel proxy are set up.
+// The Client ID is public (safe to ship). The Client SECRET lives only on
+// Vercel — never here.
+const GITHUB_CLIENT_ID = "REPLACE_WITH_CLIENT_ID";
+const OAUTH_PROXY_URL = "https://REPLACE-WITH-YOUR-APP.vercel.app/api/callback";
+
+function b64url(obj) {
+  return btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
+// One-click "Login with GitHub" via the web auth flow (no code typing).
+async function oauthLogin() {
+  if (GITHUB_CLIENT_ID.startsWith("REPLACE") || OAUTH_PROXY_URL.includes("REPLACE")) {
+    return { ok: false, reason: "Login isn't configured yet — the Client ID and Vercel URL still need to be filled in." };
+  }
+  const redirectUri = chrome.identity.getRedirectURL(); // https://<id>.chromiumapp.org/
+  const state = b64url({ r: redirectUri, n: Math.random().toString(36).slice(2) });
+  const authUrl =
+    "https://github.com/login/oauth/authorize" +
+    `?client_id=${encodeURIComponent(GITHUB_CLIENT_ID)}` +
+    `&redirect_uri=${encodeURIComponent(OAUTH_PROXY_URL)}` +
+    "&scope=repo" +
+    `&state=${encodeURIComponent(state)}`;
+
+  let finalUrl;
+  try {
+    finalUrl = await chrome.identity.launchWebAuthFlow({ url: authUrl, interactive: true });
+  } catch (_) {
+    return { ok: false, reason: "Login was cancelled." };
+  }
+
+  const frag = (finalUrl.split("#")[1]) || "";
+  const params = new URLSearchParams(frag);
+  const token = params.get("access_token");
+  if (!token) return { ok: false, reason: "GitHub error: " + (params.get("error") || "no token returned") };
+
+  let login = "";
+  try {
+    const who = await fetch("https://api.github.com/user", {
+      headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" }
+    }).then((r) => r.json());
+    login = who.login || "";
+  } catch (_) {}
+
+  const { owner } = await chrome.storage.local.get("owner");
+  const patch = { token, ghUser: login };
+  if (!owner && login) patch.owner = login;
+  await chrome.storage.local.set(patch);
+  return { ok: true, user: login, owner: patch.owner || owner || "" };
+}
+
 const DEFAULTS = {
   token: "",
   ghUser: "",
@@ -158,6 +210,11 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
         sendResponse({ ok: false, reason: err.message || String(err) });
       }
     })();
+    return true;
+  }
+
+  if (msg.type === "CPGITSYNC_OAUTH_LOGIN") {
+    oauthLogin().then(sendResponse);
     return true;
   }
 

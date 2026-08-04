@@ -1,0 +1,6 @@
+{
+  "name": "cpgitsync-oauth-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tiny GitHub OAuth token-exchange proxy for the CPGitSync extension."
+}

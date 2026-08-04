@@ -20,21 +20,7 @@
 
       <div id="connectedAs" class="connected" style="display:none;"></div>
 
-      <label class="field">
-        <span class="lbl">OAuth App Client ID <span class="safe">— not a secret, safe to paste</span></span>
-        <input type="text" id="clientId" placeholder="Iv1.xxxxxxxxxxxx or Ov23xxxxxxxx" autocomplete="off" />
-      </label>
-
-      <details class="help">
-        <summary>How to get a Client ID (one time, ~2 min)</summary>
-        <ol>
-          <li>Open <a href="https://github.com/settings/applications/new" target="_blank" rel="noopener">github.com/settings/applications/new</a></li>
-          <li><b>Application name:</b> CPGitSync &nbsp;·&nbsp; <b>Homepage URL:</b> your repo URL (anything works)</li>
-          <li><b>Authorization callback URL:</b> put your repo URL (device flow doesn't use it, but the field is required)</li>
-          <li>✅ <b>Check "Enable Device Flow"</b> — this is required.</li>
-          <li>Click <b>Register application</b>, then copy the <b>Client ID</b> and paste it above.</li>
-        </ol>
-      </details>
+      <p class="note">One click. GitHub asks you to approve CPGitSync, and you're in — no tokens, no keys to paste.</p>
 
       <div class="actions">
         <button class="btn" id="loginBtn">Login with GitHub ↗</button>

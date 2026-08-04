@@ -33,18 +33,15 @@ That's it — you keep grinding, your GitHub fills up on its own.
 
 ## Setup
 
-CPGitSync signs in with **"Login with GitHub"** (GitHub's Device Flow) — you never paste a secret key. It's a one-time OAuth App registration, then click-and-approve.
+CPGitSync signs in with a **one-click "Login with GitHub"** — you approve it on GitHub's own page and you're in. No tokens, no keys to paste. It uses a tiny OAuth proxy (the client secret never touches the extension).
 
-1. **Register an OAuth App** (one time, ~2 min) at https://github.com/settings/applications/new
-   - Application name: `CPGitSync`
-   - Homepage URL / Authorization callback URL: your repo URL (the callback isn't used by device flow, but the field is required)
-   - ✅ **Check "Enable Device Flow"** — required
-   - Register, then copy the **Client ID** (this is public, not a secret).
-2. Create an empty repo (public or private) to hold your solutions.
-3. Open the extension → **Settings** → paste the **Client ID** → click **Login with GitHub**. A code is copied to your clipboard and GitHub opens — paste it, approve, done.
-4. Fill in **owner** and **repo**, click **Test connection** (should turn green), then **Save**.
+1. **Deploy the OAuth proxy** (one time). Follow [`oauth-proxy/README.md`](oauth-proxy/README.md) — register a GitHub OAuth App, deploy the `oauth-proxy/` folder to Vercel, and set the Client ID + secret as Vercel env vars.
+2. **Wire it into the extension.** In [`src/background.js`](src/background.js), set `GITHUB_CLIENT_ID` and `OAUTH_PROXY_URL` to your values, then reload the extension.
+3. Create an empty repo (public or private) to hold your solutions.
+4. Open the extension → **Settings** → click **Login with GitHub** → approve. It auto-fills your username.
+5. Fill in **repo**, click **Test connection** (should turn green), then **Save**.
 
-> Prefer a Personal Access Token instead? There's an **Advanced** section for that — paste a fine-grained token with **Contents: Read & write**. No login needed then.
+> Prefer a Personal Access Token instead (no Vercel, no login)? There's an **Advanced** section in Settings — paste a fine-grained token with **Contents: Read & write** and skip steps 1–2 and 4.
 
 ## How your repo gets organized
 

@@ -3,7 +3,7 @@
   "name": "CPGitSync — Auto-push solutions to GitHub",
   "version": "1.0.0",
   "description": "Automatically push your accepted LeetCode, Codeforces and CodeChef solutions straight to a GitHub repository.",
-  "permissions": ["storage", "notifications", "activeTab", "scripting"],
+  "permissions": ["storage", "notifications", "activeTab", "scripting", "identity"],
   "host_permissions": [
     "https://leetcode.com/*",
     "https://codeforces.com/*",

@@ -1,11 +1,9 @@
 const $ = (id) => document.getElementById(id);
-const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function load() {
   const cfg = await chrome.storage.local.get(
-    ["clientId", "token", "ghUser", "owner", "repo", "branch", "platforms"]
+    ["token", "ghUser", "owner", "repo", "branch", "platforms"]
   );
-  $("clientId").value = cfg.clientId || "";
   $("token").value = cfg.token || "";
   $("owner").value = cfg.owner || "";
   $("repo").value = cfg.repo || "";
@@ -28,96 +26,26 @@ function showConnected(user) {
   el.innerHTML = `<span class="pill ok">Connected</span> signed in as <b>@${user}</b>`;
 }
 
-// ---- GitHub Device Flow (no backend, no secret) --------------------------
-async function deviceLogin() {
-  const clientId = $("clientId").value.trim();
-  if (!clientId) {
-    return setResult($("loginStatus"), false, "Paste your OAuth App Client ID first (see the help above).");
-  }
-  await chrome.storage.local.set({ clientId });
+// ---- One-click login (handled in the background service worker) ----------
+$("loginBtn").addEventListener("click", async () => {
   const btn = $("loginBtn");
   btn.disabled = true;
-
+  setResult($("loginStatus"), true, "Opening GitHub… approve CPGitSync in the window that pops up.");
   try {
-    // 1) Ask GitHub for a device + user code
-    const devRes = await fetch("https://github.com/login/device/code", {
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({ client_id: clientId, scope: "repo" })
-    });
-    const dev = await devRes.json();
-    if (dev.error) {
-      throw new Error(
-        dev.error === "unauthorized_client"
-          ? 'Enable "Device Flow" in your OAuth App settings, then try again.'
-          : (dev.error_description || dev.error)
-      );
+    const res = await chrome.runtime.sendMessage({ type: "CPGITSYNC_OAUTH_LOGIN" });
+    if (res && res.ok) {
+      showConnected(res.user || "you");
+      if (res.owner && !$("owner").value.trim()) $("owner").value = res.owner;
+      setResult($("loginStatus"), true, "Connected ✓  Now set your repo below.");
+    } else {
+      setResult($("loginStatus"), false, "✗ " + ((res && res.reason) || "Login failed"));
     }
-
-    // 2) Copy the code + open GitHub's approval page
-    try { await navigator.clipboard.writeText(dev.user_code); } catch (_) {}
-    renderStep(dev);
-    chrome.tabs.create({ url: dev.verification_uri });
-
-    // 3) Poll until the user approves
-    const token = await pollToken(clientId, dev.device_code, dev.interval || 5, dev.expires_in || 900);
-
-    // 4) Confirm identity + store
-    const who = await fetch("https://api.github.com/user", {
-      headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" }
-    }).then((r) => r.json());
-    const login = who.login || "";
-
-    const patch = { token, ghUser: login };
-    if (!$("owner").value.trim() && login) { patch.owner = login; $("owner").value = login; }
-    await chrome.storage.local.set(patch);
-
-    showConnected(login);
-    setResult($("loginStatus"), true, "Connected ✓  You can close the GitHub tab. Now set your repo below.");
-  } catch (err) {
-    setResult($("loginStatus"), false, "✗ " + (err.message || String(err)));
+  } catch (_) {
+    setResult($("loginStatus"), false, "✗ Login failed — reload the extension and try again.");
   } finally {
     btn.disabled = false;
   }
-}
-
-function renderStep(dev) {
-  const el = $("loginStatus");
-  el.className = "result login-status";
-  el.innerHTML = `
-    <div class="devflow">
-      <div class="dfline">Code copied to clipboard:</div>
-      <div class="dfcode">${dev.user_code}</div>
-      <div class="dfline">On the GitHub tab that just opened, paste it and click
-        <b>Continue → Authorize</b>. If clipboard was blocked, type the code above.</div>
-      <div class="dfwait">⏳ Waiting for you to approve…</div>
-    </div>`;
-}
-
-async function pollToken(clientId, deviceCode, interval, expiresIn) {
-  const deadline = Date.now() + expiresIn * 1000;
-  let wait = interval;
-  while (Date.now() < deadline) {
-    await sleep(wait * 1000);
-    const res = await fetch("https://github.com/login/oauth/access_token", {
-      method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({
-        client_id: clientId,
-        device_code: deviceCode,
-        grant_type: "urn:ietf:params:oauth:grant-type:device_code"
-      })
-    });
-    const data = await res.json();
-    if (data.access_token) return data.access_token;
-    if (data.error === "authorization_pending") continue;
-    if (data.error === "slow_down") { wait += 5; continue; }
-    if (data.error === "expired_token") throw new Error("Login timed out — click Login again.");
-    if (data.error === "access_denied") throw new Error("Authorization was denied on GitHub.");
-    if (data.error) throw new Error(data.error_description || data.error);
-  }
-  throw new Error("Login timed out — click Login again.");
-}
+});
 
 // ---- Save / test ---------------------------------------------------------
 function platforms() {
@@ -140,7 +68,7 @@ $("saveBtn").addEventListener("click", async () => {
     return setResult($("saveResult"), false, "Log in (or add a token), and fill owner + repo.");
   }
 
-  const cfg = { owner, repo, branch, platforms: platforms(), clientId: $("clientId").value.trim() };
+  const cfg = { owner, repo, branch, platforms: platforms() };
   if (manualToken) cfg.token = manualToken;
   await chrome.storage.local.set(cfg);
   setResult($("saveResult"), true, "Saved ✓");
@@ -165,6 +93,11 @@ $("testBtn").addEventListener("click", async () => {
   }
 });
 
-$("loginBtn").addEventListener("click", deviceLogin);
+// Reflect a successful background login if it lands while the page is open.
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === "local" && changes.ghUser && changes.ghUser.newValue) {
+    showConnected(changes.ghUser.newValue);
+  }
+});
 
 load();
