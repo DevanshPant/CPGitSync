@@ -8,8 +8,8 @@ import { extFor } from "./lib/langmap.js";
 // Filled in once the GitHub OAuth App + Vercel proxy are set up.
 // The Client ID is public (safe to ship). The Client SECRET lives only on
 // Vercel — never here.
-const GITHUB_CLIENT_ID = "REPLACE_WITH_CLIENT_ID";
-const OAUTH_PROXY_URL = "https://REPLACE-WITH-YOUR-APP.vercel.app/api/callback";
+const GITHUB_CLIENT_ID = "Ov23li4UqW8StPsqS4DO";
+const OAUTH_PROXY_URL = "https://cpgitsync.vercel.app/api/callback";
 
 function b64url(obj) {
   return btoa(JSON.stringify(obj)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
