@@ -29,25 +29,42 @@ async function oauthLogin() {
     "&scope=repo" +
     `&state=${encodeURIComponent(state)}`;
 
+  console.log("[CPGitSync] redirectUri:", redirectUri);
   let finalUrl;
   try {
     finalUrl = await chrome.identity.launchWebAuthFlow({ url: authUrl, interactive: true });
-  } catch (_) {
-    return { ok: false, reason: "Login was cancelled." };
+  } catch (e) {
+    console.warn("[CPGitSync] launchWebAuthFlow error:", e && e.message);
+    return { ok: false, reason: "Login was cancelled or blocked: " + (e && e.message || "") };
   }
 
   const frag = (finalUrl.split("#")[1]) || "";
   const params = new URLSearchParams(frag);
   const token = params.get("access_token");
-  if (!token) return { ok: false, reason: "GitHub error: " + (params.get("error") || "no token returned") };
+  console.log("[CPGitSync] returned; token present:", !!token, "error:", params.get("error") || "none");
+  if (!token) {
+    const err = params.get("error") || "no token returned";
+    return { ok: false, reason: "GitHub error: " + err };
+  }
 
   let login = "";
+  let userErr = "";
   try {
-    const who = await fetch("https://api.github.com/user", {
+    const res = await fetch("https://api.github.com/user", {
       headers: { Authorization: `token ${token}`, Accept: "application/vnd.github+json" }
-    }).then((r) => r.json());
+    });
+    const who = await res.json();
     login = who.login || "";
-  } catch (_) {}
+    if (!login) userErr = who.message || ("HTTP " + res.status);
+    console.log("[CPGitSync] /user status:", res.status, "login:", login || "(none)", "msg:", userErr || "-");
+  } catch (e) {
+    userErr = e && e.message;
+    console.warn("[CPGitSync] /user fetch failed:", userErr);
+  }
+
+  if (!login) {
+    return { ok: false, reason: "Got a token but couldn't read your GitHub account: " + userErr };
+  }
 
   const { owner } = await chrome.storage.local.get("owner");
   const patch = { token, ghUser: login };
